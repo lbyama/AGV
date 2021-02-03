@@ -1,5 +1,8 @@
 #include <ros/ros.h>
 #include <iostream>
+#include <std_msgs/Float64.h>
+#include <std_msgs/String.h>
+#include <std_msgs/Bool.h>
 
 template<typename std_msg_type,typename msg_type>
 class Publisher{
@@ -30,7 +33,7 @@ class BrakePublisher : public Publisher<std_msgs::Float64,float>{
 
 class GearPublisher : public Publisher<std_msgs::String,std::string>{
    public:
-      GearPublisher() : Publisher<std_msgs::String,std::string>("/brake_command"){}
+      GearPublisher() : Publisher<std_msgs::String,std::string>("/gear_command"){}
 };
 
 class HandbrakePublisher : public Publisher<std_msgs::Bool,bool>{

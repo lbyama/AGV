@@ -39,6 +39,7 @@ include_directories(
 add_executable(${PROJECT_NAME}_node
     src/shell_simulation_node.cpp
     src/publisher.cpp
+    src/subscriber.cpp
 )
 
 ## Rename C++ executable without prefix

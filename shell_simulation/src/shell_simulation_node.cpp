@@ -1,33 +1,14 @@
 #include <shell_simulation/publisher.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/String.h>
-#include <std_msgs/Bool.h>
-#include <nav_msgs/Odometry.h>
-#include <geometry_msgs/Point.h>
-#include <geometry_msgs/Quaternion.h>
-
-geometry_msgs::Point position;
-geometry_msgs::Quaternion orientation;
-
-void odomCallback(const nav_msgs::Odometry::ConstPtr& msg){
-   position = msg->pose.pose.position;
-   orientation = msg->pose.pose.orientation;
-}
-
+#include <shell_simulation/subscriber.h>
 
 int main(int argc, char **argv) {
    ros::init(argc, argv, "shell_simulation");
 
-   ros::NodeHandle nh;
-   
-   ros::Subscriber sub = nh.subscribe("/airsim_node/PhysXCar/odom_local_ned", 1, odomCallback);
+   //Cria um Subscriber para o topico da odometria
 
-   /* 
-   Cria Publishers para todos os topicos de comando passando:
-      - o tipo de mensagem publicada no topico [std_msgs];
-      - o tipo do atributo data de cada msg [std_msgs.data];
-      - uma string com o nome do topico a ser publicado [/x_command];
-   */
+   OdometrySubscriber odom_node;
+   
+   //Cria Publishers para todos os topicos
 
    BrakePublisher brake_node;
    GearPublisher gear_node;
@@ -41,37 +22,41 @@ int main(int argc, char **argv) {
    float brake = 0.0;
    std::string gear = "forward";
    bool handbrake = false;
-   float steering = 0.0;
-   float throttle = 1.0;
+   float steering = -0.01;
+   float throttle = 0.5;
    
-   char orien = 'v';
+   char orien = 'f'; //frente, tras, direita, esquerda?
 
    while (ros::ok()) {
       //Ajustar direcao que nem um seguidor de linha
-      if(orientation.x > 0 && orien == 'v'){ //se estiver virado para direita enquanto indo na vertical
-         steering = 0.01; //vire a esquerda
-      }
-      if(orientation.x < 0 && orien == 'v'){
-         steering = -0.01;
-      }
-      
-      if(position.y < -210){ //comecar a curva superior direita
-         throttle = 0.0;
-         steering = 1.0;
-         orien = 'n'; //nenhuma direcao nem outra
-      }
-      
-      if(orientation.y > -1 && orientation.y < 1){ // parar de fazer a curva
-         steering = 0.0;
-         throttle = 1.0;
-         orien = 'h';  //na horizontal
+      if(orien = 'f'){ //se estiver indo pra frente
+         if(odom_node.getAngle() < 180.0){ //se estiver virado para direita
+            steering = 0.5; //vire a esquerda
+         }else{
+            steering = -0.5;
+         }
       }
 
-      if(orientation.y < 0 && orien == 'h'){ //se estiver virado para cima enquanto indo na horizontal
-         steering = 0.01; //vire a esquerda
+      if(orien == 'e'){ //indo para a esquerda
+         if(odom_node.getAngle() > 270 || odom_node.getAngle() < 90){ //curvando para cima
+            steering = 0.5; //vire a esquerda
+         }else{
+            steering = -0.5;
+         }
       }
-      if(orientation.y > 0 && orien == 'h'){
-         steering = -0.01;
+
+      if(odom_node.getX() < -210){ //comecar a curva superior direita
+         throttle = 0.0;
+         steering = 1.0; //virar a esquerda
+         orien = 'c'; //fazendo curva
+      }
+
+      if(orien == 'c'){
+         if(odom_node.getAngle() < 5.0 && odom_node.getAngle() > 355.0){ // parar de fazer a curva
+            steering = 0.0;
+            throttle = 0.5;
+            orien = 'e';  //pa esquerda
+         }
       }
 
       //Publica o valor das variaveis em todos os topicos de controle
@@ -80,6 +65,7 @@ int main(int argc, char **argv) {
        handbrake_node.publish(handbrake);
        steering_node.publish(steering);
        throttle_node.publish(throttle);
+       //alterar para publicacao no callback
 
        ros::spinOnce();
        rate.sleep(); //Dorme tempo suficiente para manter a frequencia definida no rate();
