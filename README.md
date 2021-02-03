@@ -1,5 +1,4 @@
-# AutonomusProgramming
-Shell Eco Marathon Virtual 2021: Autonomus Programming
+GitHub
 
 Instale o git no Linux pelo terminal, usando a linha de comando 
 "sudo apt-get install git"
