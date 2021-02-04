@@ -3,7 +3,7 @@
     <node pkg="shell_simulation"
           name="shell_simulation_node"
           type="shell_simulation_node"
-	    output="screen"
+	  output="screen"
           launch-prefix="bash -c 'sleep 1.0; $0 $@'"
           />
 
