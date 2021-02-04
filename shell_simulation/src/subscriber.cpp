@@ -15,20 +15,24 @@ void OdometrySubscriber::odomCallback(const nav_msgs::Odometry::ConstPtr& msg){
    y_ = msg->pose.pose.position.y; //y
    z_ = msg->pose.pose.position.z;//z
 
-   float xo = msg->pose.pose.orientation.x;
-   float yo = msg->pose.pose.orientation.y;
+   float xo = msg->twist.twist.linear.x; //pega a velocidade em x
+   float yo = msg->twist.twist.linear.y; //e em y
 
-   float ang = atan(abs(yo)/abs(xo)); //calcula o angulo do carro em radianos
+   xo = xo*100000;
+   yo = yo*100000;
+
+   float ang = atan(xo/yo); //calcula o angulo do carro em radianos
    ang = (ang*360.0)/(2*M_PI); //transforma angulo em graus
+   ang = abs(ang); //faz o modulo do angulo
 
    //arrumando o angulo com base nos quadrantes
    if(xo < 0 && yo < 0){
        angle_ = 270 + ang;
-   }else if(xo < 0 && yo > 0){
+   }else if(xo < 0 && yo >= 0){
        angle_ = 90 - ang;
-   }else if(xo > 0 && yo < 0){
+   }else if(xo >= 0 && yo < 0){
        angle_ = 270 - ang;
-   }else if(xo > 0 && yo > 0){
+   }else if(xo >= 0 && yo >= 0){
        angle_ = 90 + ang;
    }
 }
