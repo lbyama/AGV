@@ -6,7 +6,8 @@ float OdometrySubscriber::z_;
 float OdometrySubscriber::angle_;
 
 OdometrySubscriber::OdometrySubscriber(){
-    ros::Subscriber sub = nh_.subscribe("/airsim_node/PhysXCar/odom_local_ned", 1, odomCallback);
+    //ros::Subscriber sub = nh_.subscribe("/airsim_node/PhysXCar/odom_local_ned", 1, odomCallback);
+    ros::Subscriber sub = nh_.subscribe("/odom", 1, odomCallback);
     sub_ = sub;
 }
 
@@ -15,8 +16,8 @@ void OdometrySubscriber::odomCallback(const nav_msgs::Odometry::ConstPtr& msg){
    y_ = msg->pose.pose.position.y; //y
    z_ = msg->pose.pose.position.z;//z
 
-   float xo = msg->twist.twist.linear.x; //pega a velocidade em x
-   float yo = msg->twist.twist.linear.y; //e em y
+   float xo = msg->pose.pose.orientation.x; //pega a velocidade em x
+   float yo = msg->pose.pose.orientation.y; //e em y
 
    xo = xo*100000;
    yo = yo*100000;
